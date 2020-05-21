@@ -46,17 +46,17 @@ public class CorpusProcessorTests {
             processor.process(is);
         }
 
-        Map<MarkovChainKey, Set<MarkovChainValue>> expected = new HashMap<>();
-        expected.put(sk("This"), Sets.newHashSet(v("is")));
-        expected.put(k("This", "is"), Sets.newHashSet(v("one")));
-        expected.put(k("is", "one"), Sets.newHashSet(v("sentence.")));
-        expected.put(k("one", "sentence."), Sets.newHashSet(ev()));
-        expected.put(sk("Is"), Sets.newHashSet(v("this")));
-        expected.put(k("Is", "this"), Sets.newHashSet(v("another?")));
-        expected.put(k("this", "another?"), Sets.newHashSet(ev()));
-        expected.put(sk("I"), Sets.newHashSet(v("hope")));
-        expected.put(k("I", "hope"), Sets.newHashSet(v("so!")));
-        expected.put(k("hope", "so!"), Sets.newHashSet(ev()));
+        Map<MarkovChainKey, List<MarkovChainValue>> expected = new HashMap<>();
+        expected.put(sk("This"), Lists.newArrayList(v("is")));
+        expected.put(k("This", "is"), Lists.newArrayList(v("one")));
+        expected.put(k("is", "one"), Lists.newArrayList(v("sentence.")));
+        expected.put(k("one", "sentence."), Lists.newArrayList(ev()));
+        expected.put(sk("Is"), Lists.newArrayList(v("this")));
+        expected.put(k("Is", "this"), Lists.newArrayList(v("another?")));
+        expected.put(k("this", "another?"), Lists.newArrayList(ev()));
+        expected.put(sk("I"), Lists.newArrayList(v("hope")));
+        expected.put(k("I", "hope"), Lists.newArrayList(v("so!")));
+        expected.put(k("hope", "so!"), Lists.newArrayList(ev()));
 
         Assert.assertEquals(
                 expected,
@@ -72,10 +72,10 @@ public class CorpusProcessorTests {
     }
 
     private MarkovChainValue v(String w1) {
-        return new MarkovChainValue(false, w1);
+        return new MarkovChainValue(w1);
     }
 
     private MarkovChainValue ev() {
-        return new MarkovChainValue(true, null);
+        return MarkovChainValue.END_VALUE;
     }
 }

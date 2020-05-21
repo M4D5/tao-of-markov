@@ -35,6 +35,8 @@ public class CorpusProcessor {
 
             repository.addEndSequence(sentence.get(sentence.size() - 2), sentence.get(sentence.size() - 1));
         }
+
+        repository.optimize();
     }
 
 

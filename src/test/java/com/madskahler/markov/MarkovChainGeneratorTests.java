@@ -43,10 +43,6 @@ public class MarkovChainGeneratorTests {
         Assert.assertEquals("This is a sentence.", chainGenerator.generateString());
     }
 
-    private MarkovChainRepository.MarkovChainKey sk(String w) {
-        return new MarkovChainRepository.MarkovChainKey(true, null, w);
-    }
-
     private MarkovChainRepository.MarkovChainKey k(String w1, String w2) {
         return new MarkovChainRepository.MarkovChainKey(false, w1, w2);
     }

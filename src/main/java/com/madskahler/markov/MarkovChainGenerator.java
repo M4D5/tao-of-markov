@@ -35,14 +35,11 @@ public class MarkovChainGenerator {
         List<String> words = new ArrayList<>();
         List<MarkovChainKey> keys = generateChain();
 
-        for (int i = 0; i < keys.size(); i++) {
-            MarkovChainKey key = keys.get(i);
+        for (MarkovChainKey key : keys) {
             words.add(key.getWord1());
-
-            if (i == keys.size() - 1) {
-                words.add(key.getWord2());
-            }
         }
+
+        words.add(keys.get(keys.size() - 1).getWord2());
 
         return String.join(" ", words);
     }

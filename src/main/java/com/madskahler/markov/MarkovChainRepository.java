@@ -5,17 +5,18 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class MarkovChainRepository {
     private final Random random;
-    private final Map<MarkovChainKey, Set<MarkovChainValue>> map = new HashMap<>();
+    private final Map<MarkovChainKey, List<MarkovChainValue>> map = new HashMap<>();
+    private final Set<MarkovChainKey> startKeys = new HashSet<>();
 
     public void addStartSequence(String word1, String word2) {
         MarkovChainKey key = new MarkovChainKey(true, null, word1);
         MarkovChainValue value = new MarkovChainValue(false, word2);
         createOrUpdateEntry(key, value);
+        startKeys.add(key);
     }
 
     public void addSequence(String word1, String word2, String word3) {
@@ -26,34 +27,50 @@ public class MarkovChainRepository {
 
     public void addEndSequence(String word1, String word2) {
         MarkovChainKey key = new MarkovChainKey(false, word1, word2);
-        MarkovChainValue value = new MarkovChainValue(true, null);
-        createOrUpdateEntry(key, value);
+        createOrUpdateEntry(key, MarkovChainValue.END_VALUE);
     }
 
     public Sequence getRandomStartSequence() {
-        List<Map.Entry<MarkovChainKey, Set<MarkovChainValue>>> startSeqs = map.entrySet()
-                .stream()
-                .filter(kv -> kv.getKey().beginning)
-                .collect(Collectors.toList());
+        MarkovChainKey key = getRandomElement(startKeys);
+        MarkovChainValue value = getRandomElement(map.get(key));
+        return new Sequence(key, value);
+    }
 
-        Map.Entry<MarkovChainKey, Set<MarkovChainValue>> sequences = startSeqs.get(random.nextInt(startSeqs.size()));
-        return new Sequence(sequences.getKey(), getRandomElement(sequences.getValue()));
+    public void optimize() {
+        for(List<MarkovChainValue> values : map.values()) {
+            Set<MarkovChainValue> valuesSet = new HashSet<>();
+
+            List<Integer> indexes = new ArrayList<>();
+
+            for (int i = 0; i < values.size(); i++) {
+                MarkovChainValue value = values.get(i);
+                if (valuesSet.contains(value)) {
+                    indexes.add(i);
+                } else {
+                    valuesSet.add(value);
+                }
+            }
+
+            for (int i = indexes.size() - 1; i >= 0; i--) {
+                values.remove((int) indexes.get(i));
+            }
+        }
     }
 
     public MarkovChainValue getRandomSequence(MarkovChainKey key) {
-        Set<MarkovChainValue> values = map.get(key);
+        List<MarkovChainValue> values = map.get(key);
 
         if (values == null) {
             throw new IllegalStateException(String.format("No sequence could be found matching the words '%s', '%s'", key.getWord1(), key.getWord2()));
         }
 
-        return getRandomElement(values);
+        return values.get(random.nextInt(values.size()));
     }
 
-    private MarkovChainValue getRandomElement(Set<MarkovChainValue> values) {
+    private <T> T getRandomElement(Collection<T> values) {
         int n = random.nextInt(values.size());
 
-        Iterator<MarkovChainValue> iterator = values.iterator();
+        Iterator<T> iterator = values.iterator();
 
         for (int i = 0; i < n; i++) {
             iterator.next();
@@ -64,7 +81,7 @@ public class MarkovChainRepository {
 
     private void createOrUpdateEntry(MarkovChainKey key, MarkovChainValue value) {
         if (!map.containsKey(key)) {
-            Set<MarkovChainValue> set = new LinkedHashSet<>();
+            List<MarkovChainValue> set = new ArrayList<>();
             set.add(value);
             map.put(key, set);
         } else {
@@ -72,9 +89,9 @@ public class MarkovChainRepository {
         }
     }
 
-    public Map<MarkovChainKey, Set<MarkovChainValue>> getMap() {
-        Map<MarkovChainKey, Set<MarkovChainValue>> map = new HashMap<>(this.map);
-        map.replaceAll((k, v) -> new HashSet<>(v));
+    public Map<MarkovChainKey, List<MarkovChainValue>> getMap() {
+        Map<MarkovChainKey, List<MarkovChainValue>> map = new HashMap<>(this.map);
+        map.replaceAll((k, v) -> new ArrayList<>(v));
         return map;
     }
 
@@ -111,15 +128,22 @@ public class MarkovChainRepository {
     @EqualsAndHashCode
     @Getter
     public static class MarkovChainValue {
+        public static final MarkovChainValue END_VALUE = new MarkovChainValue(true, null);
+
         private final boolean end;
         private final String word;
 
-        public MarkovChainValue(boolean end, String word) {
+        private MarkovChainValue(boolean end, String word) {
             if (end && word != null) {
                 throw new IllegalStateException("An end value may not have a word");
             }
 
             this.end = end;
+            this.word = word;
+        }
+
+        public MarkovChainValue(String word) {
+            this.end = false;
             this.word = word;
         }
 
