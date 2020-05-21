@@ -10,6 +10,7 @@ import static com.madskahler.markov.MarkovChainRepository.*;
 @RequiredArgsConstructor
 public class MarkovChainGenerator {
     private final MarkovChainRepository repository;
+    private final WordRepository wordRepository;
 
     public List<MarkovChainKey> generateChain() {
         Sequence startSequence = repository.getRandomStartSequence();
@@ -36,10 +37,10 @@ public class MarkovChainGenerator {
         List<MarkovChainKey> keys = generateChain();
 
         for (MarkovChainKey key : keys) {
-            words.add(key.getWord1());
+            words.add(wordRepository.getById(key.getWord1()));
         }
 
-        words.add(keys.get(keys.size() - 1).getWord2());
+        words.add(wordRepository.getById(keys.get(keys.size() - 1).getWord2()));
 
         return String.join(" ", words);
     }

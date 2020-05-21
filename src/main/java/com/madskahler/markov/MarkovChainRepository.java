@@ -9,24 +9,26 @@ import java.util.*;
 @RequiredArgsConstructor
 public class MarkovChainRepository {
     private final Random random;
+    private final WordRepository wordRepository;
+
     private final Map<MarkovChainKey, List<MarkovChainValue>> map = new HashMap<>();
     private final Set<MarkovChainKey> startKeys = new HashSet<>();
 
     public void addStartSequence(String word1, String word2) {
-        MarkovChainKey key = new MarkovChainKey(true, null, word1);
-        MarkovChainValue value = new MarkovChainValue(false, word2);
+        MarkovChainKey key = new MarkovChainKey(true, -1, wordRepository.getOrAdd(word1));
+        MarkovChainValue value = new MarkovChainValue(false, wordRepository.getOrAdd(word2));
         createOrUpdateEntry(key, value);
         startKeys.add(key);
     }
 
     public void addSequence(String word1, String word2, String word3) {
-        MarkovChainKey key = new MarkovChainKey(false, word1, word2);
-        MarkovChainValue value = new MarkovChainValue(false, word3);
+        MarkovChainKey key = new MarkovChainKey(false, wordRepository.getOrAdd(word1), wordRepository.getOrAdd(word2));
+        MarkovChainValue value = new MarkovChainValue(false, wordRepository.getOrAdd(word3));
         createOrUpdateEntry(key, value);
     }
 
     public void addEndSequence(String word1, String word2) {
-        MarkovChainKey key = new MarkovChainKey(false, word1, word2);
+        MarkovChainKey key = new MarkovChainKey(false, wordRepository.getOrAdd(word1), wordRepository.getOrAdd(word2));
         createOrUpdateEntry(key, MarkovChainValue.END_VALUE);
     }
 
@@ -106,11 +108,11 @@ public class MarkovChainRepository {
     @Getter
     public static class MarkovChainKey {
         private final boolean beginning;
-        private final String word1;
-        private final String word2;
+        private final int word1;
+        private final int word2;
 
-        public MarkovChainKey(boolean beginning, String word1, String word2) {
-            if (beginning && word1 != null) {
+        public MarkovChainKey(boolean beginning, int word1, int word2) {
+            if (beginning && word1 != -1) {
                 throw new IllegalStateException("A beginning sequence may not have a first word");
             }
 
@@ -121,20 +123,20 @@ public class MarkovChainRepository {
 
         @Override
         public String toString() {
-            return (word1 == null ? "<start>" : word1) + " " + word2;
+            return (word1 == -1 ? "<start>" : word1) + " " + word2;
         }
     }
 
     @EqualsAndHashCode
     @Getter
     public static class MarkovChainValue {
-        public static final MarkovChainValue END_VALUE = new MarkovChainValue(true, null);
+        public static final MarkovChainValue END_VALUE = new MarkovChainValue(true, -1);
 
         private final boolean end;
-        private final String word;
+        private final int word;
 
-        private MarkovChainValue(boolean end, String word) {
-            if (end && word != null) {
+        private MarkovChainValue(boolean end, int word) {
+            if (end && word != -1) {
                 throw new IllegalStateException("An end value may not have a word");
             }
 
@@ -142,14 +144,14 @@ public class MarkovChainRepository {
             this.word = word;
         }
 
-        public MarkovChainValue(String word) {
+        public MarkovChainValue(int word) {
             this.end = false;
             this.word = word;
         }
 
         @Override
         public String toString() {
-            return word == null ? "<end>" : word;
+            return word == -1 ? "<end>" : Integer.toString(word);
         }
     }
 }
