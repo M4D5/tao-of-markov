@@ -12,7 +12,7 @@ public class MarkovChainRepository {
     private final WordRepository wordRepository;
 
     private final Map<MarkovChainKey, List<MarkovChainValue>> map = new HashMap<>();
-    private final Set<MarkovChainKey> startKeys = new HashSet<>();
+    private final Set<MarkovChainKey> startKeys = new LinkedHashSet<>();
 
     public void addStartSequence(String word1, String word2) {
         MarkovChainKey key = new MarkovChainKey(true, -1, wordRepository.getOrAdd(word1));
@@ -34,7 +34,8 @@ public class MarkovChainRepository {
 
     public Sequence getRandomStartSequence() {
         MarkovChainKey key = getRandomElement(startKeys);
-        MarkovChainValue value = getRandomElement(map.get(key));
+        List<MarkovChainValue> values = map.get(key);
+        MarkovChainValue value = values.get(random.nextInt(values.size()));
         return new Sequence(key, value);
     }
 

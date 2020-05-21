@@ -15,11 +15,12 @@ import static com.madskahler.markov.MarkovChainRepository.MarkovChainKey;
 import static com.madskahler.markov.MarkovChainRepository.MarkovChainValue;
 
 public class CorpusProcessorTests {
+    private final WordRepository wordRepository = new WordRepository();
 
     @Test
     @SneakyThrows(IOException.class)
     public void testSentenceReader() {
-        MarkovChainRepository repository = new MarkovChainRepository(new Random());
+        MarkovChainRepository repository = new MarkovChainRepository(new Random(), wordRepository);
         CorpusProcessor processor = new CorpusProcessor(repository);
 
         String str = "This is one sentence. Is this another? I hope so! Thanks, my friend.";
@@ -37,7 +38,7 @@ public class CorpusProcessorTests {
     @Test
     @SneakyThrows(IOException.class)
     public void testProcess() {
-        MarkovChainRepository repository = new MarkovChainRepository(new Random());
+        MarkovChainRepository repository = new MarkovChainRepository(new Random(), wordRepository);
         CorpusProcessor processor = new CorpusProcessor(repository);
 
         String str = "This is one sentence. Is this another? I hope so!";
@@ -64,15 +65,15 @@ public class CorpusProcessorTests {
     }
 
     private MarkovChainKey sk(String w) {
-        return new MarkovChainKey(true, null, w);
+        return new MarkovChainKey(true, -1, wordRepository.getOrAdd(w));
     }
 
     private MarkovChainKey k(String w1, String w2) {
-        return new MarkovChainKey(false, w1, w2);
+        return new MarkovChainKey(false, wordRepository.getOrAdd(w1), wordRepository.getOrAdd(w2));
     }
 
     private MarkovChainValue v(String w1) {
-        return new MarkovChainValue(w1);
+        return new MarkovChainValue(wordRepository.getOrAdd(w1));
     }
 
     private MarkovChainValue ev() {

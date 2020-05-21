@@ -11,16 +11,15 @@ import java.util.concurrent.TimeUnit;
 
 public class Program {
     public static void main(String[] args) throws IOException {
-        MarkovChainRepository repository = new MarkovChainRepository(new Random());
+        WordRepository wordRepository = new WordRepository();
+        MarkovChainRepository repository = new MarkovChainRepository(new Random(), wordRepository);
         CorpusProcessor corpusProcessor = new CorpusProcessor(repository);
-        MarkovChainGenerator chainGenerator = new MarkovChainGenerator(repository);
+        MarkovChainGenerator chainGenerator = new MarkovChainGenerator(repository, wordRepository);
 
-        Path corpusPath = Paths.get("D:/corpus/t9TextCorpus.txt");
-
-
+        Path corpusPath = Paths.get("D:/tao.txt");
         String str = String.join("\n", Files.readAllLines(corpusPath));
 
-        int iterations = 4;
+        int iterations = 1;
 
         Stopwatch sw = Stopwatch.createStarted();
         for (int i = 0; i < iterations; i++) {
@@ -28,19 +27,21 @@ public class Program {
         }
         sw.stop();
 
-        System.out.println(String.format("Processed corpus %d times, average time: %sms.", iterations, sw.elapsed(TimeUnit.MILLISECONDS) / iterations));
+        System.out.println(String.format("Processed corpus %d times, average time: %.2fms.", iterations, sw.elapsed(TimeUnit.MICROSECONDS) / (double) (iterations * 1000)));
 
-//        iterations = 10000;
-//
-//        sw.reset();
-//        sw.start();
-//        for (int i = 0; i < iterations; i++) {
-//            chainGenerator.generateString();
-//        }
-//        sw.stop();
-//
-//        System.out.println(String.format("Generated %d sentences, average time: %sms.", iterations, sw.elapsed(TimeUnit.MILLISECONDS) / iterations));
-//
-//        System.out.println(chainGenerator.generateString());
+        iterations = 10000000;
+
+        sw.reset();
+        sw.start();
+        for (int i = 0; i < iterations; i++) {
+            chainGenerator.generateString();
+        }
+        sw.stop();
+
+        System.out.println(String.format("Generated %d sentences, average time: %.2fms.", iterations, sw.elapsed(TimeUnit.MICROSECONDS) / (double) (iterations * 1000)));
+
+        System.out.println(chainGenerator.generateString());
     }
+
+
 }

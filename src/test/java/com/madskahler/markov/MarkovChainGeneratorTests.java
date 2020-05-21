@@ -11,11 +11,13 @@ import java.io.InputStream;
 import java.util.Random;
 
 public class MarkovChainGeneratorTests {
+    private final WordRepository wordRepository = new WordRepository();
+
     @Test
     @SneakyThrows(IOException.class)
     public void testChainGeneration() {
-        MarkovChainRepository repository = new MarkovChainRepository(new Random());
-        MarkovChainGenerator chainGenerator = new MarkovChainGenerator(repository);
+        MarkovChainRepository repository = new MarkovChainRepository(new Random(), wordRepository);
+        MarkovChainGenerator chainGenerator = new MarkovChainGenerator(repository, wordRepository);
         CorpusProcessor processor = new CorpusProcessor(repository);
 
         String sentence = "This is a sentence.";
@@ -30,8 +32,8 @@ public class MarkovChainGeneratorTests {
     @Test
     @SneakyThrows(IOException.class)
     public void testStringGeneration() {
-        MarkovChainRepository repository = new MarkovChainRepository(new Random());
-        MarkovChainGenerator chainGenerator = new MarkovChainGenerator(repository);
+        MarkovChainRepository repository = new MarkovChainRepository(new Random(), wordRepository);
+        MarkovChainGenerator chainGenerator = new MarkovChainGenerator(repository, wordRepository);
         CorpusProcessor processor = new CorpusProcessor(repository);
 
         String sentence = "This is a sentence.";
@@ -44,6 +46,6 @@ public class MarkovChainGeneratorTests {
     }
 
     private MarkovChainRepository.MarkovChainKey k(String w1, String w2) {
-        return new MarkovChainRepository.MarkovChainKey(false, w1, w2);
+        return new MarkovChainRepository.MarkovChainKey(false, wordRepository.getOrAdd(w1), wordRepository.getOrAdd(w2));
     }
 }
