@@ -39,6 +39,9 @@ public class MarkovChainRepository {
         return new Sequence(key, value);
     }
 
+    /**
+     * Removes the duplicate sequences in the repository
+     */
     public void optimize() {
         for(List<MarkovChainValue> values : map.values()) {
             Set<MarkovChainValue> valuesSet = new HashSet<>();

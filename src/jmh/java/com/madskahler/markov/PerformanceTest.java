@@ -1,6 +1,7 @@
 package com.madskahler.markov;
 
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,7 +42,8 @@ public class PerformanceTest {
     }
 
     @Benchmark
-    public void testGenerator() {
-        generator.generateString();
+    public void testGenerator(Blackhole blackhole) {
+
+        blackhole.consume(generator.generateString());
     }
 }
