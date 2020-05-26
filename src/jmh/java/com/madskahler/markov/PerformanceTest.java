@@ -37,13 +37,12 @@ public class PerformanceTest {
     }
 
     @Benchmark
-    public void testProcessor() {
+    public void testProcessor() throws IOException {
         processor.process(text);
     }
 
     @Benchmark
     public void testGenerator(Blackhole blackhole) {
-
         blackhole.consume(generator.generateString());
     }
 }

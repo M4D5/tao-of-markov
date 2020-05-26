@@ -1,7 +1,6 @@
 package com.madskahler.markov;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.madskahler.markov.MarkovChainRepository.MarkovChainKey;
 import static com.madskahler.markov.MarkovChainRepository.MarkovChainValue;
@@ -20,18 +20,15 @@ public class CorpusProcessorTests {
     @Test
     @SneakyThrows(IOException.class)
     public void testSentenceReader() {
-        MarkovChainRepository repository = new MarkovChainRepository(new Random(), wordRepository);
-        CorpusProcessor processor = new CorpusProcessor(repository);
-
         String str = "This is one sentence. Is this another? I hope so! Thanks, my friend.";
 
-        try (InputStream is = new ByteArrayInputStream(str.getBytes())) {
+        try (InputStream is = new ByteArrayInputStream(str.getBytes()); Scanner s = new Scanner(is)) {
             Assert.assertEquals(
                     Lists.newArrayList(Lists.newArrayList("This", "is", "one", "sentence."),
                             Lists.newArrayList("Is", "this", "another?"),
                             Lists.newArrayList("I", "hope", "so!"),
                             Lists.newArrayList("Thanks,", "my", "friend.")),
-                    processor.readSentences(is));
+                    SentenceScanner.getStream(s).collect(Collectors.toList()));
         }
     }
 
